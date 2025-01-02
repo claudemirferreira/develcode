@@ -5,10 +5,10 @@ services:
     image: mysql:8.0
     container_name: develcode-db
     environment:
-      MYSQL_ROOT_PASSWORD: root  
       MYSQL_DATABASE: develcode 
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_USER: develcode
+      MYSQL_PASSWORD: develcode
+      MYSQL_ROOT_PASSWORD: develcode  
     ports:
       - "3306:3306"
     volumes:
