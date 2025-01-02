@@ -1,0 +1,27 @@
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: checkout
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/develcode
+    username: root
+    password: root
+
+  jpa:
+    show-sql: true
+    database: mysql
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8080
