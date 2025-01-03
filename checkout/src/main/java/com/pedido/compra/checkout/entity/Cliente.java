@@ -1,5 +1,6 @@
 package com.pedido.compra.checkout.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,7 @@ public class Cliente {
     @Column(nullable = false)
     private BigDecimal saldo;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Pedido> pedidos;
 

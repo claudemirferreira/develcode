@@ -1,5 +1,6 @@
 package com.pedido.compra.checkout.entity;
 
+import com.pedido.compra.checkout.enums.StatusPedidoEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -29,9 +32,13 @@ public class Pedido {
     private Pagamento pagamento;
 
     @Column(nullable = false)
-    private LocalDate data;
+    private OffsetDateTime data;
 
     @Column(nullable = false)
     private BigDecimal valor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatusPedidoEnum status;
 
 }
