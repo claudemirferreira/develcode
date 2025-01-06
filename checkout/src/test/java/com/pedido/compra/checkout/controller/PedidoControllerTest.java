@@ -2,6 +2,7 @@ package com.pedido.compra.checkout.controller;
 
 import com.pedido.compra.checkout.controller.dto.pedido.CreatePedidoRequest;
 import com.pedido.compra.checkout.controller.mapper.PedidoMapper;
+import com.pedido.compra.checkout.entity.Cliente;
 import com.pedido.compra.checkout.entity.Pedido;
 import com.pedido.compra.checkout.service.PedidoService;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +37,13 @@ class PedidoControllerTest {
     void deveCriarPedidoComSucesso() {
         // Arrange
         CreatePedidoRequest request = new CreatePedidoRequest(1L, new BigDecimal("100.00"));
-        Pedido pedido = new Pedido(1L, 1L, new BigDecimal("100.00"), null); // Ajustar conforme sua entidade
+        Pedido pedido = Pedido
+                .builder()
+                .id(1L)
+                .valor(new BigDecimal("100.00"))
+                .data(LocalDateTime.now())
+                .cliente(Cliente.builder().id(1L).build())
+                .build();
 
         when(pedidoMapper.toEntity(request)).thenReturn(pedido);
         when(pedidoService.criar(pedido)).thenReturn(pedido);
@@ -43,4 +52,37 @@ class PedidoControllerTest {
         Pedido result = pedidoController.criar(request);
 
         // Assert
-        assertEquals(ped
+        assertEquals(pedido, result);
+        verify(pedidoService, times(1)).criar(pedido);
+        verify(pedidoMapper, times(1)).toEntity(request);
+    }
+
+    @Test
+    void deveBuscarTodosOsPedidosComSucesso() {
+        // Arrange
+        Pedido pedido1 = Pedido
+                .builder()
+                .id(1L)
+                .valor(new BigDecimal("100.00"))
+                .data(LocalDateTime.now())
+                .cliente(Cliente.builder().id(1L).build())
+                .build();
+        Pedido pedido2 = Pedido
+                .builder()
+                .id(2L)
+                .valor(new BigDecimal("100.00"))
+                .data(LocalDateTime.now())
+                .cliente(Cliente.builder().id(1L).build())
+                .build();
+        List<Pedido> pedidos = List.of(pedido1, pedido2);
+
+        when(pedidoService.buscarTodos()).thenReturn(pedidos);
+
+        // Act
+        List<Pedido> result = pedidoController.buscarTodos();
+
+        // Assert
+        assertEquals(pedidos, result);
+        verify(pedidoService, times(1)).buscarTodos();
+    }
+}

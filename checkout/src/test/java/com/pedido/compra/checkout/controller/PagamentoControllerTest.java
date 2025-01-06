@@ -1,85 +1,63 @@
 package com.pedido.compra.checkout.controller;
 
-import com.pedido.compra.checkout.controller.dto.pagamento.BaixarPagamentoRequest;
-import com.pedido.compra.checkout.entity.Pagamento;
+import com.pedido.compra.checkout.controller.dto.pagamento.PagamentoResponse;
+import com.pedido.compra.checkout.controller.mapper.PedidoMapper;
+import com.pedido.compra.checkout.entity.Pedido;
 import com.pedido.compra.checkout.service.PagamentoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class PagamentoControllerTest {
-
-    private MockMvc mockMvc;
 
     @Mock
     private PagamentoService pagamentoService;
 
-    @InjectMocks
+    @Mock
+    private PedidoMapper pedidoMapper;
+
     private PagamentoController pagamentoController;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(pagamentoController).build();
+        pagamentoController = new PagamentoController(pagamentoService, pedidoMapper);
     }
 
     @Test
-    void testEfetuarPagamento() throws Exception {
-        // Arrange: Criando um pedido fictício
+    void testEfetuarPagamento_Success() {
+        // Arrange
         Long pedidoId = 1L;
-        Pagamento pagamentoMock = Pagamento
-                .builder()
-                .id(1L)
-                .dataPagamento(LocalDateTime.now())
-                .build();
+        Pedido pedidoMock = mock(Pedido.class);
+        PagamentoResponse pagamentoResponseMock = new PagamentoResponse(
+                2L,
+                pedidoId,
+                new BigDecimal("100.00"),
+                LocalDateTime.now(),
+                "João Silva"
+        );
 
-        // Simulando o comportamento do serviço
-        when(pagamentoService.efetuarPagamento(pedidoId)).thenReturn(pagamentoMock);
+        when(pagamentoService.efetuarPagamento(pedidoId)).thenReturn(pedidoMock);
+        when(pedidoMapper.toPagamentoResponse(pedidoMock)).thenReturn(pagamentoResponseMock);
 
-        // Act & Assert: Verificando a resposta da requisição POST para efetuar pagamento
-        mockMvc.perform(post("/pagamento/pedido/{pedidoId}", pedidoId)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.dataPagamento").exists());
+        // Act
+        ResponseEntity<PagamentoResponse> response = pagamentoController.efetuarPagamento(pedidoId);
 
-        // Verificando se o método do serviço foi chamado
-        verify(pagamentoService, times(1)).efetuarPagamento(pedidoId);
-    }
-
-    @Test
-    void testEfetuar() throws Exception {
-        // Arrange: Criando uma solicitação fictícia
-        BaixarPagamentoRequest request = new BaixarPagamentoRequest(1L, 1L, 100.0);
-        Pagamento pagamentoMock = Pagamento
-                .builder()
-                .id(1L)
-                .dataPagamento(LocalDateTime.now())
-                .build();
-
-        // Simulando a resposta do serviço
-        when(pagamentoService.efetuarPagamento(anyLong())).thenReturn(pagamentoMock);
-
-        // Act & Assert: Verificando a resposta da requisição POST
-        mockMvc.perform(post("/pagamento")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"clientId\":1, \"pedidoId\":1, \"valor\":100.0}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.dataPagamento").exists());
-
-        // Verificando se o serviço foi chamado
-        verify(pagamentoService, times(1)).efetuarPagamento(anyLong());
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(pagamentoResponseMock, response.getBody());
+        verify(pagamentoService).efetuarPagamento(pedidoId);
+        verify(pedidoMapper).toPagamentoResponse(pedidoMock);
     }
 }

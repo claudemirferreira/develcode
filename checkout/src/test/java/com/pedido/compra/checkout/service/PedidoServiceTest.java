@@ -10,14 +10,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class PedidoServiceTest {
+class PedidoServiceTest {
 
     @Mock
     private PedidoRepository pedidoRepository;
@@ -35,11 +37,11 @@ public class PedidoServiceTest {
         pedido = new Pedido();
         pedido.setId(1L);
         pedido.setStatus(StatusPedidoEnum.PENDENTE);
-        pedido.setData(OffsetDateTime.now());
+        pedido.setData(LocalDateTime.now());
     }
 
     @Test
-    public void testCriarPedido() {
+    void testCriarPedido() {
         // Arrange
         when(pedidoRepository.save(any(Pedido.class))).thenReturn(pedido);
 
@@ -54,7 +56,7 @@ public class PedidoServiceTest {
     }
 
     @Test
-    public void testBuscarTodosPedidos() {
+    void testBuscarTodosPedidos() {
         // Arrange
         when(pedidoRepository.findAll()).thenReturn(List.of(pedido));
 
@@ -69,7 +71,7 @@ public class PedidoServiceTest {
     }
 
     @Test
-    public void testBuscarPorIdPedidoExistente() {
+    void testBuscarPorIdPedidoExistente() {
         // Arrange
         when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
 
@@ -83,7 +85,7 @@ public class PedidoServiceTest {
     }
 
     @Test
-    public void testBuscarPorIdPedidoNaoExistente() {
+    void testBuscarPorIdPedidoNaoExistente() {
         // Arrange
         when(pedidoRepository.findById(2L)).thenReturn(Optional.empty());
 
@@ -91,7 +93,7 @@ public class PedidoServiceTest {
         NotFoundException thrown = assertThrows(NotFoundException.class, () -> {
             pedidoService.buscarPorId(2L);
         });
-        assertEquals("não encountrou o pedido 2", thrown.getMessage());
+        assertEquals("não encountrou o pedido 2", thrown.getReason());
         verify(pedidoRepository, times(1)).findById(2L); // Verifica se findById foi chamado uma vez
     }
 }

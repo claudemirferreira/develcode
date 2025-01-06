@@ -8,13 +8,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
-public class WebClientConfigTest {
+class WebClientConfigTest {
 
     @Autowired
     private WebClient webClient;
 
     @Test
-    public void testWebClientBean() {
+    void testWebClientBean() {
         // Verifica se o WebClient foi configurado corretamente e não é nulo
         assertNotNull(webClient, "O WebClient não foi configurado corretamente");
     }

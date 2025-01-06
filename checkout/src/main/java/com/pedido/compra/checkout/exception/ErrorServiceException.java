@@ -6,6 +6,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class ErrorServiceException extends ResponseStatusException {
 
     public ErrorServiceException(String reason) {
-        super(HttpStatus.CONFLICT, reason);
+        super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
     }
 }

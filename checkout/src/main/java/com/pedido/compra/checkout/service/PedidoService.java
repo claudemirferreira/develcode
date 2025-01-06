@@ -6,7 +6,7 @@ import com.pedido.compra.checkout.exception.NotFoundException;
 import com.pedido.compra.checkout.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -23,7 +23,7 @@ public class PedidoService {
     }
 
     public Pedido criar(Pedido pedido) {
-        pedido.setData(OffsetDateTime.now());
+        pedido.setData(LocalDateTime.now());
         pedido.setStatus(StatusPedidoEnum.PENDENTE);
         return salvar(pedido);
     }

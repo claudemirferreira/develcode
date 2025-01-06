@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,8 +33,8 @@ class ClienteControllerTest {
     @Test
     void deveCriarClienteComSucesso() {
         // Arrange
-        CreateClienteRequest request = new CreateClienteRequest("João", "joao@example.com");
-        Cliente cliente = new Cliente(1L, "João", "joao@example.com");
+        CreateClienteRequest request = new CreateClienteRequest("João", new BigDecimal("100"));
+        Cliente cliente = new Cliente(1L, "João",  new BigDecimal("100"), null);
         
         when(clienteMapper.toEntity(request)).thenReturn(cliente);
         when(clienteService.salvar(cliente)).thenReturn(cliente);
@@ -50,8 +51,8 @@ class ClienteControllerTest {
     @Test
     void deveBuscarTodosOsClientesComSucesso() {
         // Arrange
-        Cliente cliente1 = new Cliente(1L, "João", "joao@example.com");
-        Cliente cliente2 = new Cliente(2L, "Maria", "maria@example.com");
+        Cliente cliente1 = new Cliente(1L, "João",  new BigDecimal("100"), null);
+        Cliente cliente2 = new Cliente(2L, "Maria", new BigDecimal("100"), null);
         List<Cliente> clientes = List.of(cliente1, cliente2);
 
         when(clienteService.buscarTodos()).thenReturn(clientes);

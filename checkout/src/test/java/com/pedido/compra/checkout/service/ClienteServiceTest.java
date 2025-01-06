@@ -8,8 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -32,7 +32,7 @@ class ClienteServiceTest {
         cliente = new Cliente();
         cliente.setId(1L);
         cliente.setNome("John Doe");
-        cliente.setSaldo(100.00);
+        cliente.setSaldo(new BigDecimal("100.00"));
     }
 
     @Test
@@ -54,7 +54,7 @@ class ClienteServiceTest {
         Cliente cliente2 = new Cliente();
         cliente2.setId(2L);
         cliente2.setNome("Jane Doe");
-        cliente2.setSaldo(200.00);
+        cliente2.setSaldo(new BigDecimal("100.00"));
 
         List<Cliente> clientes = List.of(cliente, cliente2);
         when(clienteRepository.findAll()).thenReturn(clientes);
@@ -67,16 +67,4 @@ class ClienteServiceTest {
         verify(clienteRepository, times(1)).findAll();
     }
 
-    @Test
-    void deveBuscarClientePorIdComSucesso() {
-        // Arrange
-        when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
-
-        // Act
-        Optional<Cliente> result = clienteService.buscarPorId(1L);
-
-        // Assert
-        assertEquals(Optional.of(cliente), result);
-        verify(clienteRepository, times(1)).findById(1L);
-    }
 }

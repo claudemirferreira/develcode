@@ -1,25 +1,23 @@
 package com.pedido.compra.checkout.service;
 
 import com.pedido.compra.checkout.controller.dto.pagamento.BaixarPagamentoRequest;
-import com.pedido.compra.checkout.entity.Cliente;
-import com.pedido.compra.checkout.entity.Pagamento;
+import com.pedido.compra.checkout.controller.dto.pagamento.PagamentoApiResponse;
 import com.pedido.compra.checkout.entity.Pedido;
 import com.pedido.compra.checkout.enums.StatusPedidoEnum;
-import com.pedido.compra.checkout.exception.ServiceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class PagamentoServiceTest {
-
-    @InjectMocks
-    private PagamentoService pagamentoService;
+class PagamentoServiceTest {
 
     @Mock
     private PedidoService pedidoService;
@@ -27,37 +25,66 @@ public class PagamentoServiceTest {
     @Mock
     private PagamentoApiService pagamentoApiService;
 
+    @InjectMocks
+    private PagamentoService pagamentoService;
+
     private Pedido pedido;
-    private Cliente cliente;
+    PagamentoApiResponse pagamentoApiResponse;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // Criação de um cliente e pedido mockados
-        cliente = new Cliente();
-        cliente.setId(1L);
-
-        pedido = new Pedido();
-        pedido.setId(1L);
-        pedido.setCliente(cliente);
-        pedido.setValor(100.00);
-        pedido.setStatus(StatusPedidoEnum.PENDENTE);
+        // Criar um pedido de exemplo
+        pedido = Pedido.builder()
+                .id(1L)
+                .valor(new BigDecimal("100.00"))
+                .status(StatusPedidoEnum.PENDENTE)
+                .build();
+        pagamentoApiResponse = new PagamentoApiResponse(
+                1L, 1L, new BigDecimal("100.00"), LocalDateTime.now()
+        );
     }
 
     @Test
-    public void testEfetuarPagamento_Success() {
-        // Arrange
-        when(pedidoService.buscarPorId(1L)).thenReturn(pedido);  // Mock do PedidoService
-        doNothing().when(pagamentoApiService).enviarPagamento(any(BaixarPagamentoRequest.class));  // Mock do PagamentoApiService
+    void efetuarPagamento_DeveAtualizarPedidoParaPagoQuandoSucesso() {
 
-        // Act
-        Pagamento pagamento = pagamentoService.efetuarPagamento(1L);
+        // Configurar mocks
+        when(pedidoService.buscarPorId(1L)).thenReturn(pedido);
+        when(pagamentoApiService.enviarPagamento(any(BaixarPagamentoRequest.class)))
+                .thenReturn(pagamentoApiResponse);
 
-        // Assert
-        assertNotNull(pagamento);
-        assertEquals(pedido, pagamento.getPedido());
-        assertEquals(StatusPedidoEnum.PAGO, pedido.getStatus());
+        // Executar o método
+        Pedido resultado = pagamentoService.efetuarPagamento(1L);
 
-        // Verificar interações com as dependências
-        verify(pedidoSe
+        // Verificar comportamento
+        verify(pedidoService).buscarPorId(1L);
+        verify(pagamentoApiService).enviarPagamento(any(BaixarPagamentoRequest.class));
+        verify(pedidoService).salvar(any(Pedido.class));
+
+        // Verificar estado do pedido
+        assertEquals(StatusPedidoEnum.PAGO, resultado.getStatus());
+        assertNotNull(resultado.getPagamento());
+        assertEquals(1L, resultado.getPagamento().getId());
+    }
+
+    @Test
+    void efetuarPagamento_DeveAtualizarPedidoParaCanceladoQuandoFalha() {
+        // Configurar mocks para lançar exceção
+        when(pedidoService.buscarPorId(1L)).thenReturn(pedido);
+        doThrow(new RuntimeException("Erro ao processar pagamento"))
+                .when(pagamentoApiService).enviarPagamento(any(BaixarPagamentoRequest.class));
+
+        // Executar o método
+        Pedido resultado = pagamentoService.efetuarPagamento(1L);
+
+        // Verificar comportamento
+        verify(pedidoService).buscarPorId(1L);
+        verify(pagamentoApiService).enviarPagamento(any(BaixarPagamentoRequest.class));
+        verify(pedidoService).salvar(any(Pedido.class));
+
+        // Verificar estado do pedido
+        assertEquals(StatusPedidoEnum.CANCELADO, resultado.getStatus());
+        assertNull(resultado.getPagamento());
+    }
+}
