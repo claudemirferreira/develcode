@@ -1,0 +1,38 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Pagamento API",
+      "description": "API para gerenciamento de pagamentos"
+    },
+    "host": "localhost:3001",
+    "basePath": "/",
+    "paths": {
+      "/pagamento": {
+        "post": {
+          "summary": "Salva um novo pagamento",
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pedidoId": { "type": "integer" },
+                  "valor": { "type": "number" },
+                  "dataPagamento": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "201": { "description": "Pagamento salvo com sucesso" },
+            "400": { "description": "Dados inválidos" },
+            "500": { "description": "Erro interno" }
+          }
+        }
+      }
+    }
+  }
+  
